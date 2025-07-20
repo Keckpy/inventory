@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New Order Form</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input { margin: 4px; padding: 4px; }
+    .item-row { display: flex; gap: 10px; margin-bottom: 6px; }
+    #req-input { margin-left: 100px;}
+  </style>
+</head>
+<body>
+  <h1>📝 New Order Form</h1>
+  <form id="orderForm">
+    <fieldset>
+      <label>
+        Order Date:
+        <input type="date" id="order-date">
+      </label>
+      <label>
+        <span id="req-input">Req #: <input type="number" id="req-number"></span>
+      </label>
+
+      <h3>Items:</h3>
+      <div id="items">
+        <!-- 10 rows will be inserted here -->
+      </div>
+
+      <button type="button" onclick="submitOrder()">✅ Submit Order</button>
+    </fieldset>
+  </form>
+
+  
+  
+
+  <script>
+    // Set default date to today
+    document.getElementById('order-date').value = new Date().toISOString().split('T')[0];
+
+    // Generate 10 item input rows
+    const itemsContainer = document.getElementById('items');
+    for (let i = 0; i < 10; i++) {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Item name" class="item-name" />
+        <input type="number" min="1" placeholder="Quantity" class="item-qty" />
+      `;
+      itemsContainer.appendChild(row);
+    }
+
+    function submitOrder() {
+      const date = document.getElementById('order-date').value;
+      const req = document.getElementById('req-number').value;
+      const names = document.querySelectorAll('.item-name');
+      const quantities = document.querySelectorAll('.item-qty');
+
+      const orderItems = [];
+
+      for (let i = 0; i < names.length; i++) {
+        const name = names[i].value.trim();
+        const qty = parseInt(quantities[i].value);
+        if (name && qty > 0) {
+          orderItems.push({ name, quantity: qty });
+        }
+      }
+
+      if (!date || orderItems.length === 0) {
+        alert('Please enter a date and at least one valid item.');
+        return;
+      }
+
+      const newOrder = {
+        date,
+        req,
+        items: orderItems
+      };
+
+      const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+      pendingOrders.push(newOrder);
+      localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+
+      alert('Order saved successfully!');
+      location.reload();
+    }
+  </script>
+</body>
+</html>

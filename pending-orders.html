@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pending Orders</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; }
+    .order { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; position: relative; }
+    .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
+      background: green;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 6px;
+    }
+    th {
+      background-color: #eee;
+      text-align: center;
+    }
+    th:first-child, td:first-child {
+      width: 80%;
+    }
+    th:last-child, td:last-child {
+      width: 20%;
+    }
+    td {
+      text-align: center;
+    }
+    #date {
+      margin-right: 180px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Pending Orders</h1>
+  <div id="orders"></div>
+
+  <script>
+    const ordersContainer = document.getElementById('orders');
+    let pendingOrders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+
+    function renderOrders() {
+      ordersContainer.innerHTML = ''; // Clear container
+
+      if (pendingOrders.length === 0) {
+        ordersContainer.innerHTML = '<p>No pending orders.</p>';
+        return;
+      }
+
+      pendingOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      pendingOrders.forEach((order, index) => {
+        const div = document.createElement('div');
+        div.className = 'order';
+
+        div.innerHTML = `
+          <span id="date"><strong>Date:</strong> ${order.date}</span>
+          <span id="req"><strong>Req #:</strong> ${order.req || '—'}</span>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${order.items.map(item => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.quantity}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '✅ All Items Received';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.addEventListener('click', () => {
+          pendingOrders.splice(index, 1);
+          localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+          renderOrders();
+        });
+
+        div.appendChild(deleteBtn);
+        ordersContainer.appendChild(div);
+      });
+    }
+
+    renderOrders();
+  </script>
+</body>
+</html>
